@@ -58,20 +58,15 @@ namespace SF.Snowball.Ext
         private static readonly char[] gV = new char[]{(char) (17), (char) (65), (char) (16), (char) (1)};
 		private static readonly char[] g_v_WXY = new char[]{(char) (1), (char) (17), (char) (65), (char) (208), (char) (1)};
 		private static readonly char[] g_valid_LI = new char[]{(char) (55), (char) (141), (char) (2)};
+
+        private class State
+        {
+            public bool B_Y_found;
+            public int I_p2;
+            public int I_p1;
+        }
 		
-		private bool B_Y_found;
-		private int I_p2;
-		private int I_p1;
-		
-		protected internal virtual void  copyFrom(EnglishStemmer other)
-		{
-			B_Y_found = other.B_Y_found;
-			I_p2 = other.I_p2;
-			I_p1 = other.I_p1;
-			base.copyFrom(other);
-		}
-		
-		private bool rPrelude()
+		private bool rPrelude(State s)
 		{
 			int v1;
 			int v2;
@@ -79,7 +74,7 @@ namespace SF.Snowball.Ext
 			int v4;
 			// (, line 23
 			// unset Y_found, line 24
-			B_Y_found = false;
+			s.B_Y_found = false;
 			// do, line 25
 			v1 = cursor;
 			do 
@@ -101,7 +96,7 @@ namespace SF.Snowball.Ext
 				// <-, line 25
 				sliceFrom("Y");
 				// set Y_found, line 25
-				B_Y_found = true;
+				s.B_Y_found = true;
 			}
 			while (false);
 
@@ -160,7 +155,7 @@ golab4Brk: ;
 						// <-, line 26
 						sliceFrom("Y");
 						// set Y_found, line 26
-						B_Y_found = true;
+						s.B_Y_found = true;
 						goto replab2;
 					}
 					while (false);
@@ -184,13 +179,13 @@ lab1Brk: ;
 			return true;
 		}
 		
-		private bool rMarkRegions()
+		private bool rMarkRegions(State s)
 		{
 			int v1;
 			int v2;
 			// (, line 29
-			I_p1 = limit;
-			I_p2 = limit;
+			s.I_p1 = limit;
+			s.I_p2 = limit;
 			// do, line 32
 			v1 = cursor;
 			do 
@@ -269,7 +264,7 @@ golab5Brk: ;
 lab1Brk: ;
 				
 				// setmark p1, line 37
-				I_p1 = cursor;
+				s.I_p1 = cursor;
 				// gopast, line 38
 				while (true)
 				{
@@ -319,7 +314,7 @@ lab10Brk: ;
 golab9Brk: ;
 				
 				// setmark p2, line 38
-				I_p2 = cursor;
+				s.I_p2 = cursor;
 			}
 			while (false);
 
@@ -329,7 +324,7 @@ lab0Brk: ;
 			return true;
 		}
 		
-		private bool rShortv()
+		private bool rShortv(State s)
 		{
 			int v1;
 			// (, line 44
@@ -381,26 +376,26 @@ lab0Brk: ;
 
 			return true;
 		}
-		
-		private bool r_R1()
+
+        private bool r_R1(State s)
 		{
-			if (!(I_p1 <= cursor))
+			if (!(s.I_p1 <= cursor))
 			{
 				return false;
 			}
 			return true;
 		}
-		
-		private bool r_R2()
+
+        private bool r_R2(State s)
 		{
-			if (!(I_p2 <= cursor))
+			if (!(s.I_p2 <= cursor))
 			{
 				return false;
 			}
 			return true;
 		}
-		
-		private bool r_Step1a()
+
+        private bool r_Step1a(State s)
 		{
 			int amongVar;
 			int v1;
@@ -504,8 +499,8 @@ golab2Brk: ;
 				}
 			return true;
 		}
-		
-		private bool r_Step1b()
+
+        private bool r_Step1b(State s)
 		{
 			int amongVar;
 			int v1;
@@ -531,7 +526,7 @@ golab2Brk: ;
 				case 1: 
 					// (, line 66
 					// call R1, line 66
-					if (!r_R1())
+					if (!r_R1(s))
 					{
 						return false;
 					}
@@ -614,14 +609,14 @@ golab0Brk: ;
 						case 3: 
 							// (, line 76
 							// atmark, line 76
-							if (cursor != I_p1)
+							if (cursor != s.I_p1)
 							{
 								return false;
 							}
 							// test, line 76
 							v4 = limit - cursor;
 							// call shortv, line 76
-							if (!rShortv())
+							if (!rShortv(s))
 							{
 								return false;
 							}
@@ -638,8 +633,8 @@ golab0Brk: ;
 				}
 			return true;
 		}
-		
-		private bool r_Step1c()
+
+        private bool r_Step1c(State s)
 		{
 			int v1;
 			int v2;
@@ -703,8 +698,8 @@ lab2Brk: ;
 			sliceFrom("i");
 			return true;
 		}
-		
-		private bool r_Step2()
+
+        private bool r_Step2(State s)
 		{
 			int amongVar;
 			// (, line 88
@@ -719,7 +714,7 @@ lab2Brk: ;
 			// ], line 89
 			bra = cursor;
 			// call R1, line 89
-			if (!r_R1())
+			if (!r_R1(s))
 			{
 				return false;
 			}
@@ -836,8 +831,8 @@ lab2Brk: ;
 				}
 			return true;
 		}
-		
-		private bool r_Step3()
+
+        private bool r_Step3(State s)
 		{
 			int amongVar;
 			// (, line 115
@@ -852,7 +847,7 @@ lab2Brk: ;
 			// ], line 116
 			bra = cursor;
 			// call R1, line 116
-			if (!r_R1())
+			if (!r_R1(s))
 			{
 				return false;
 			}
@@ -895,7 +890,7 @@ lab2Brk: ;
 				case 6: 
 					// (, line 125
 					// call R2, line 125
-					if (!r_R2())
+					if (!r_R2(s))
 					{
 						return false;
 					}
@@ -905,8 +900,8 @@ lab2Brk: ;
 				}
 			return true;
 		}
-		
-		private bool r_Step4()
+
+        private bool r_Step4(State s)
 		{
 			int amongVar;
 			int v1;
@@ -922,7 +917,7 @@ lab2Brk: ;
 			// ], line 130
 			bra = cursor;
 			// call R2, line 130
-			if (!r_R2())
+			if (!r_R2(s))
 			{
 				return false;
 			}
@@ -975,8 +970,8 @@ lab0Brk: ;
 				}
 			return true;
 		}
-		
-		private bool r_Step5()
+
+        private bool r_Step5(State s)
 		{
 			int amongVar;
 			int v1;
@@ -1008,7 +1003,7 @@ lab0Brk: ;
 						do 
 						{
 							// call R2, line 140
-							if (!r_R2())
+							if (!r_R2(s))
 							{
 								goto lab1Brk;
 							}
@@ -1021,7 +1016,7 @@ lab1Brk: ;
 						cursor = limit - v1;
 						// (, line 140
 						// call R1, line 140
-						if (!r_R1())
+						if (!r_R1(s))
 						{
 							return false;
 						}
@@ -1031,7 +1026,7 @@ lab1Brk: ;
 							do 
 							{
 								// call shortv, line 140
-								if (!rShortv())
+								if (!rShortv(s))
 								{
 									goto lab2Brk;
 								}
@@ -1053,7 +1048,7 @@ lab0Brk: ;
 				case 2: 
 					// (, line 141
 					// call R2, line 141
-					if (!r_R2())
+					if (!r_R2(s))
 					{
 						return false;
 					}
@@ -1068,8 +1063,8 @@ lab0Brk: ;
 				}
 			return true;
 		}
-		
-		private bool rException2()
+
+        private bool rException2(State s)
 		{
 			// (, line 145
 			// [, line 147
@@ -1088,8 +1083,8 @@ lab0Brk: ;
 			}
 			return true;
 		}
-		
-		private bool rException1()
+
+        private bool rException1(State s)
 		{
 			int amongVar;
 			// (, line 157
@@ -1182,14 +1177,14 @@ lab0Brk: ;
 				}
 			return true;
 		}
-		
-		private bool rPostlude()
+
+        private bool rPostlude(State s)
 		{
 			int v1;
 			int v2;
 			// (, line 192
 			// Boolean test Y_found, line 192
-			if (!(B_Y_found))
+			if (!(s.B_Y_found))
 			{
 				return false;
 			}
@@ -1250,8 +1245,8 @@ replab0Brk: ;
 			
 			return true;
 		}
-		
-		public virtual bool Stem()
+
+        public virtual bool Stem()
 		{
 			int v1;
 			int v2;
@@ -1269,13 +1264,15 @@ replab0Brk: ;
 			// (, line 194
 			// or, line 196
 
+            State s = new State();
+
 			do 
 			{
 				v1 = cursor;
 				do 
 				{
 					// call exception1, line 196
-					if (!rException1())
+					if (!rException1(s))
 					{
 						goto lab1Brk;
 					}
@@ -1304,7 +1301,7 @@ lab1Brk: ;
 				do 
 				{
 					// call prelude, line 199
-					if (!rPrelude())
+					if (!rPrelude(s))
 					{
 						goto lab2Brk;
 					}
@@ -1319,7 +1316,7 @@ lab2Brk: ;
 				do 
 				{
 					// call markRegions, line 200
-					if (!rMarkRegions())
+					if (!rMarkRegions(s))
 					{
 						goto lab3Brk;
 					}
@@ -1337,7 +1334,7 @@ lab3Brk: ;
 				do 
 				{
 					// call Step1a, line 203
-					if (!r_Step1a())
+					if (!r_Step1a(s))
 					{
 						goto lab4Brk;
 					}
@@ -1355,7 +1352,7 @@ lab4Brk: ;
 					do 
 					{
 						// call exception2, line 205
-						if (!rException2())
+						if (!rException2(s))
 						{
 							goto lab6Brk;
 						}
@@ -1372,7 +1369,7 @@ lab6Brk: ;
 					do 
 					{
 						// call Step1b, line 207
-						if (!r_Step1b())
+						if (!r_Step1b(s))
 						{
 							goto lab7Brk;
 						}
@@ -1387,7 +1384,7 @@ lab7Brk: ;
 					do 
 					{
 						// call Step1c, line 208
-						if (!r_Step1c())
+						if (!r_Step1c(s))
 						{
 							goto lab8Brk;
 						}
@@ -1402,7 +1399,7 @@ lab8Brk: ;
 					do 
 					{
 						// call Step2, line 210
-						if (!r_Step2())
+						if (!r_Step2(s))
 						{
 							goto lab9Brk;
 						}
@@ -1417,7 +1414,7 @@ lab9Brk: ;
 					do 
 					{
 						// call Step3, line 211
-						if (!r_Step3())
+						if (!r_Step3(s))
 						{
 							goto lab10Brk;
 						}
@@ -1432,7 +1429,7 @@ lab10Brk: ;
 					do 
 					{
 						// call Step4, line 212
-						if (!r_Step4())
+						if (!r_Step4(s))
 						{
 							goto lab11Brk;
 						}
@@ -1447,7 +1444,7 @@ lab11Brk: ;
 					do 
 					{
 						// call Step5, line 214
-						if (!r_Step5())
+						if (!r_Step5(s))
 						{
 							goto lab12Brk;
 						}
@@ -1467,7 +1464,7 @@ lab5Brk: ;
 				do 
 				{
 					// call postlude, line 217
-					if (!rPostlude())
+					if (!rPostlude(s))
 					{
 						goto lab13Brk;
 					}

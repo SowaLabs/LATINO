@@ -24,11 +24,13 @@ namespace Latino.TextMining
     public class Stemmer : IStemmer, ISerializable
     {
         private Language mLanguage;
+        private ISnowballStemmer mStemmer;
 
         public Stemmer(Language language)
         {
             mLanguage = language;
-            Utils.ThrowException(CreateStemmer() == null ? new ArgumentNotSupportedException("language") : null);
+            bool success = CreateStemmer();
+            Utils.ThrowException(!success ? new ArgumentNotSupportedException("language") : null);
         }
 
         public Stemmer(BinarySerializer reader)
@@ -36,36 +38,48 @@ namespace Latino.TextMining
             Load(reader); // throws ArgumentNullException, serialization-related exceptions
         }
 
-        private ISnowballStemmer CreateStemmer()
+        private bool CreateStemmer()
         {
             switch (mLanguage)
             {
                 case Language.English:
-                    return new EnglishStemmer();
+                    mStemmer = new EnglishStemmer();
+                    return true;
                 case Language.German:
-                    return new German2Stemmer();
+                    mStemmer = new German2Stemmer();
+                    return true;
                 case Language.French:
-                    return new FrenchStemmer();
+                    mStemmer = new FrenchStemmer();
+                    return true;
                 case Language.Spanish:
-                    return new SpanishStemmer();
+                    mStemmer = new SpanishStemmer();
+                    return true;
                 case Language.Italian:
-                    return new ItalianStemmer();
+                    mStemmer = new ItalianStemmer();
+                    return true;
                 case Language.Portuguese:
-                    return new PortugueseStemmer();
+                    mStemmer = new PortugueseStemmer();
+                    return true;
                 case Language.Danish:
-                    return new DanishStemmer();
+                    mStemmer = new DanishStemmer();
+                    return true;
                 case Language.Dutch:
-                    return new DutchStemmer();
+                    mStemmer = new DutchStemmer();
+                    return true;
                 case Language.Finnish:
-                    return new FinnishStemmer();
+                    mStemmer = new FinnishStemmer();
+                    return true;
                 case Language.Norwegian:
-                    return new NorwegianStemmer();
+                    mStemmer = new NorwegianStemmer();
+                    return true;
                 case Language.Russian:
-                    return new RussianStemmer();
+                    mStemmer = new RussianStemmer();
+                    return true;
                 case Language.Swedish:
-                    return new SwedishStemmer();
+                    mStemmer = new SwedishStemmer();
+                    return true;
                 default:
-                    return null;
+                    return false;
             }
         }
 
@@ -76,10 +90,9 @@ namespace Latino.TextMining
             Utils.ThrowException(word == null ? new ArgumentNullException("word") : null);
             try
             {
-                ISnowballStemmer stemmer = CreateStemmer();
-                stemmer.SetCurrent(word);
-                stemmer.Stem();
-                return stemmer.GetCurrent();
+                mStemmer.SetCurrent(word);
+                mStemmer.Stem();
+                return mStemmer.GetCurrent();
             }
             catch { return word; }
         }
